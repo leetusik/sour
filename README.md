@@ -15,3 +15,12 @@
     - first time gather the FS over years
     - after that, every day check if there is a new FS.
 
+---
+## commands
+```bash
+# make migrations
+docker compose exec sour-app alembic revision --autogenerate -m "Your migration message"
+
+# migrate(using docker-entrypoint.sh)
+docker compose restart sour-app
+```
