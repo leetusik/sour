@@ -40,6 +40,7 @@ services:
       - ./app:/app/app
       - ./alembic:/app/alembic
       - ./alembic.ini:/app/alembic.ini
+      - ./logs:/app/logs          # <-- ADD THIS LINE
     depends_on:
       db:
         condition: service_healthy
@@ -58,6 +59,7 @@ services:
       - ./app:/app/app
       - ./alembic:/app/alembic
       - ./alembic.ini:/app/alembic.ini
+      - ./logs:/app/logs          # <-- ADD THIS LINE
     depends_on:
       db:
         condition: service_healthy
