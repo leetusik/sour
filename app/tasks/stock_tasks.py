@@ -56,6 +56,9 @@ async def _daily_task_run_master_pipeline_async():
         task_preprocess_daily_prices.s(stock_id) for stock_id in new_stock_ids
     )
 
+    price_chain = chain(get_prices_tasks, preprocessing_prices_tasks)
+    price_chain_chord = chord(price_chain, task_notify_completion.s())
+
     # 3. Create a "group" of financial statement gathering tasks to run.
     get_financial_statements_tasks = group(
         task_fetch_financial_statements.s(stock_id) for stock_id in new_stock_ids
@@ -65,6 +68,17 @@ async def _daily_task_run_master_pipeline_async():
     preprocessing_financial_statements_tasks = group(
         task_preprocess_financial_statements.s(stock_id) for stock_id in new_stock_ids
     )
+
+    financial_statement_chain = chain(
+        get_financial_statements_tasks, preprocessing_financial_statements_tasks
+    )
+    financial_statement_chain_chord = chord(
+        financial_statement_chain, task_notify_completion.s()
+    )
+
+    # 5. Create a "chord" - This runs the price chain and the financial statement chain, and when both are finished, it calls the 'task_notify_completion' callback.
+    pipeline = chain(price_chain_chord, financial_statement_chain_chord)
+    pipeline.apply_async()
 
 
 @celery_app.task
