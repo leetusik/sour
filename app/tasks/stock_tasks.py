@@ -1,22 +1,21 @@
-import time
-from app.worker import celery_app # Import the Celery app
+import asyncio
+from app.worker import celery_app  # Import the Celery app
+from app.db.session import AsyncSessionLocal
 
-# This is your background task for stocks
+
+async def _daily_task_run_master_pipeline_async():
+    """
+    Run the daily task pipeline.
+    """
+
+    # async with AsyncSessionLocal() as session:
+
+
 @celery_app.task
-def run_stock_pipeline():
+def daily_task_run_master_pipeline():
     """
-    This is your long-running task.
-    1. Gather stock data from outer API
-    2. Loop creating of retrieved data
-    3. Same thing for price
+    Run the daily task pipeline.
     """
-    print("Stock pipeline started...")
-    time.sleep(10)
-    print("...Stock pipeline finished!")
-    
-    return "Stock and price data successfully imported."
 
-# You can add other stock-related tasks here
-# @celery_app.task
-# def update_single_stock_price(stock_id):
-#     ...
+    print("Daily task pipeline started...")
+    asyncio.run(_daily_task_run_master_pipeline_async())
