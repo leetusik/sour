@@ -1,0 +1,1 @@
+from app.tasks import stock_price_task

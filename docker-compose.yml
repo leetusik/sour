@@ -1,14 +1,11 @@
-# docker-compose.yml
-version: '3.8'
-
 services:
   db:
     image: postgres:16-alpine
     container_name: sour-db
     ports:
-      - "5432:5432" # Expose DB port to your host machine
+      - "5432:5432"
     env_file:
-      - .env # Load secrets from .env file
+      - .env
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -21,20 +18,54 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: sour-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
-    build: . # Build from the Dockerfile in the current directory
+    build: .
     container_name: sour-app
     ports:
       - "8000:8000"
     env_file:
-      - .env # Also load secrets into the app
+      - .env
     volumes:
-      - ./app:/app/app         # Mount your app code for hot-reloading
-      - ./alembic:/app/alembic # Mount your alembic code
-      - ./alembic.ini:/app/alembic.ini # Mount your alembic config
+      - ./app:/app/app
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
     depends_on:
       db:
-        condition: service_healthy # Waits for the db healthcheck to pass
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    entrypoint: ["/app/docker-entrypoint.sh"] # Runs migrations first
+    # This command is passed to the entrypoint to run after migrations
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  worker:
+    build: . # Uses the same image as 'app'
+    container_name: sour-worker
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app/app
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    entrypoint: ["/app/docker-entrypoint.sh"] # Also runs migrations first
+    # This command is passed to the entrypoint to run after migrations
+    command: ["celery", "-A", "app.worker.celery_app", "worker", "--loglevel=info"]
 
 volumes:
   postgres_data:
