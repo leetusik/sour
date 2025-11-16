@@ -1,1 +1,1 @@
-from app.tasks import stock_price_task
+# from app.tasks import stock_price_task

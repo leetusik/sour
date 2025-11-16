@@ -1,22 +1,16 @@
 from fastapi import APIRouter
-from app.tasks.stock_tasks import run_stock_pipeline
+from app.tasks.stock_tasks import daily_task_run_master_pipeline
 
 # 1. Create a router for this resource
 router = APIRouter()
 
-@router.post("/", status_code=202)  # Path is just "/"
-async def create_job():
+
+@router.post("/daily_task_pipeline", status_code=202)
+async def create_daily_task_pipeline():
     """
-    Creates a new background job.
-    In the future, this endpoint could take a body
-    to decide which job to run.
+    Run the daily task pipeline.
     """
-    
-    # .delay() sends the task to Celery
-    task = run_stock_pipeline.delay()
-    
-    # Return the task ID so the client can (optionally) track it
-    return {
-        "message": "Stock import job has been started.",
-        "job_id": task.id
-    }
+
+    daily_task_run_master_pipeline.delay()
+
+    return {"message": "Daily task pipeline has been started."}
