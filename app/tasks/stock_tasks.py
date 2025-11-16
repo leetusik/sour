@@ -42,6 +42,30 @@ async def _daily_task_run_master_pipeline_async():
             new_stock_ids.append(new_stock.id)
         logger.info("Daily task pipeline: Step 3/3 - Created new stocks.")
 
+    if not new_stock_ids:
+        logger.warning("PIPELINE: No stocks to process. Finishing early.")
+        return
+
+    # 1. Create a "group" of gathering daily prices tasks to run.
+    get_prices_tasks = group(
+        task_fetch_daily_prices.s(stock_id) for stock_id in new_stock_ids
+    )
+
+    # 2. Create a "group" of preprocessing tasks to run.
+    preprocessing_prices_tasks = group(
+        task_preprocess_daily_prices.s(stock_id) for stock_id in new_stock_ids
+    )
+
+    # 3. Create a "group" of financial statement gathering tasks to run.
+    get_financial_statements_tasks = group(
+        task_fetch_financial_statements.s(stock_id) for stock_id in new_stock_ids
+    )
+
+    # 4. Create a "group" of financial statement preprocessing tasks to run.
+    preprocessing_financial_statements_tasks = group(
+        task_preprocess_financial_statements.s(stock_id) for stock_id in new_stock_ids
+    )
+
 
 @celery_app.task
 def daily_task_run_master_pipeline():
