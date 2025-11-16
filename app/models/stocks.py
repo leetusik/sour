@@ -141,9 +141,7 @@ class FinancialStatement(Base):
         Boolean, default=False
     )
     is_operating_income_this_year_better_than_last_year = Column(Boolean, default=False)
-    is_operating_income_this_quarter_better_than_year_before_quarter = Column(
-        Boolean, default=False
-    )
+    is_oi_this_quarter_better_than_year_before_quarter = Column(Boolean, default=False)
 
     operating_income_growth_rate_this_quarter = Column(Float, default=0)
     operating_income_growth_rate_tm1_quarter = Column(Float, default=0)

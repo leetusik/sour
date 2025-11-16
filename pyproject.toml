@@ -13,6 +13,8 @@ dependencies = [
     "psycopg2-binary>=2.9.11",
     "pydantic>=2.12.4",
     "pydantic-settings>=2.12.0",
+    "pykrx>=1.0.51",
     "redis>=7.0.1",
+    "setuptools>=80.9.0",
     "uvicorn>=0.38.0",
 ]

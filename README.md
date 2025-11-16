@@ -19,8 +19,8 @@
 ## commands
 ```bash
 # make migrations
-docker compose exec sour-app alembic revision --autogenerate -m "Your migration message"
+docker compose exec app alembic revision --autogenerate -m "Your migration message"
 
-# migrate(using docker-entrypoint.sh)
-docker compose restart sour-app
+# migrate
+docker compose exec app alembic upgrade head
 ```

@@ -5,6 +5,6 @@ set -e
 echo "Running database migrations..."
 alembic upgrade head
 
-# Start the FastAPI application
+# Start the application (whatever command is passed)
 echo "Starting application..."
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+exec "$@"
